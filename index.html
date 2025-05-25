@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Surgical</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .question h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .options label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #fff;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .options label:hover {
+            background-color: #e9f5ff;
+            border-color: #007bff;
+        }
+        .options input[type="radio"] {
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .options label.selected {
+            background-color: #d0eaff;
+            border-color: #0056b3;
+        }
+
+        .options input[type="radio"]:checked {
+            accent-color: #007bff;
+        }
+
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .score-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            display: none;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+        .highlight-error {
+            border: 1px solid red;
+        }
+        .options label.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        .options label.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        .question-note {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .supplication {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        .developer-note {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 1.0em;
+            font-weight: bold;
+            color: #0B13A2;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h2>Surgical</h2>
+        <form id="quizForm">
+            </form>
+
+        <div id="scoreContainer" class="score-container">
+            <h3>Your Score: <span id="score">0</span> / <span id="totalQuestions">0</span></h3>
+        </div>
+    </div>
+
+    <script>
+        const quizForm = document.getElementById('quizForm');
+        const scoreContainer = document.getElementById('scoreContainer');
+        const scoreSpan = document.getElementById('score');
+        const totalQuestionsSpan = document.getElementById('totalQuestions');
+
+        let correctAnswers = {};
+        let questionIds = [];
+
+        const allQuestionsData = [
+            {
+                question: 'Regarding body water, which of the following is true?',
+                options: ['Water makes up 80% of the total body weight.', 'Intracellular compartment has much water than extracellular compartment.', 'Plasma has much water than interstitium.', 'Extracellular compartment contains two thirds of total body water.'],
+                correctAnswer: 'Intracellular compartment has much water than extracellular compartment.'
+            },
+            {
+                question: 'Regarding body water, which of the following is false?',
+                options: ['Insensible losses include evaporation of water from the lungs (exhaled air).', 'Body temperature and ambient temperature affect body water loss.', 'Potassium (K+) is the predominant ion in intracellular compartment.', 'Calcium (Ca+) and chloride (Cl−) are the predominant ions in extracellular compartment.'],
+                correctAnswer: 'Calcium (Ca+) and chloride (Cl−) are the predominant ions in extracellular compartment.'
+            },
+            {
+                question: 'Most of the body water present in:',
+                options: ['Intracellular compartment.', 'Extracellular compartment.', 'Plasma.', 'Interstitial fluid.'],
+                correctAnswer: 'Intracellular compartment.'
+            },
+            {
+                question: 'Extracellular compartment represents about:',
+                options: ['15% total body water.', '25% total body water.', '35% total body water.', '45% total body water.'],
+                correctAnswer: '35% total body water.'
+            },
+            {
+                question: 'Which of the following ion predominates in intracellular compartment?',
+                options: ['Na+', 'K+', 'Ca++', 'Mg++'],
+                correctAnswer: 'K+'
+            },
+            {
+                question: 'Which of the following ion predominates in extracellular compartment?',
+                options: ['Na+', 'K+', 'Ca++', 'Mg++'],
+                correctAnswer: 'Na+'
+            },
+            {
+                question: 'Which of the following is Not an indication of IV fluid therapy?',
+                options: ['Preoperative resuscitation.', 'Electrolyte disorders.', 'Delivery of some chemotherapeutic drugs.', 'Malnutrition with normal GIT.'],
+                correctAnswer: 'Malnutrition with normal GIT.'
+            },
+            {
+                question: 'Which of the following crystalloid fluid contains potassium?',
+                options: ['Normal saline.', 'Hartmann\'s solution.', 'Hypertonic saline.', 'Dextrose.'],
+                correctAnswer: 'Hartmann\'s solution.'
+            },
+            {
+                question: 'Which of the following is not considered crystalloid fluid?',
+                options: ['Normal saline.', 'Ringer lactate.', 'Dextran.', 'Dextrose.'],
+                correctAnswer: 'Dextran.'
+            },
+            {
+                question: 'Which of the following is not considered colloid fluid?',
+                options: ['Fresh frozen plasma (FFP).', 'Hydroxyethyl starch (Hetastarch).', 'Dextran.', 'Dextrose.'],
+                correctAnswer: 'Dextrose.'
+            },
+            {
+                question: 'Regarding IV fluid therapy, which of the following is false?',
+                options: ['Crystalloids include Ringer lactate solution.', 'Crystalloids are fast at expanding intravascular space & amount administered equal to amount lost.', 'Colloids have risk of allergic reaction.', 'Colloids have risk of renal dysfunction.'],
+                correctAnswer: 'Crystalloids are fast at expanding intravascular space & amount administered equal to amount lost.'
+            },
+            {
+                question: 'Regarding crystalloid fluid therapy, which of the following is false?',
+                options: ['Large molecules that stay in intravascular space.', 'No allergic reactions or coagulation problems.', 'Fluids of choice in resuscitation.', 'High amount of fluids needed to equal amount lost.'],
+                correctAnswer: 'Large molecules that stay in intravascular space.'
+            },
+            {
+                question: 'Which of the following is Not used for assessment of fluid status?',
+                options: ['Pulse.', 'Urine output.', 'Central venous pressure (CVP).', 'Bleeding time.'],
+                correctAnswer: 'Bleeding time.'
+            },
+            {
+                question: 'Which of the following is Not an indication for Central venous catheter?',
+                options: ['Short-term IV therapy in the hospital setting (preferred method).', 'Central venous pressure (CVP) monitoring.', 'Total parenteral nutrition (TPN).', 'The need for multiple IV lines to deliver multiple medications at the same time.'],
+                correctAnswer: 'Short-term IV therapy in the hospital setting (preferred method).'
+            },
+            {
+                question: 'Which of the following is Not a systemic complication of Central venous catheter?',
+                options: ['Infiltration/Extravasation.', 'Pulmonary edema.', 'Catheter-related sepsis.', 'Air embolism.'],
+                correctAnswer: 'Infiltration/Extravasation.'
+            },
+            {
+                question: 'Which of the following is Not a local complication of Central venous catheter?',
+                options: ['Phlebitis.', 'Infiltration/Extravasation.', 'Pulmonary edema.', 'Local infection at IV site.'],
+                correctAnswer: 'Pulmonary edema.'
+            },
+            {
+                question: 'Which of the following infection is Not transmitted by blood transfusion?',
+                options: ['Viral hepatitis A.', 'Viral hepatitis B.', 'Viral hepatitis C.', 'Malaria.'],
+                correctAnswer: 'Viral hepatitis A.'
+            },
+            {
+                question: 'Regarding blood transfusion, which of the following is considered delayed complication?',
+                options: ['Pyrogenic reactions.', 'Hemolytic reactions.', 'Iron overload.', 'Transfusion-related lung Injury.'],
+                correctAnswer: 'Iron overload.'
+            },
+            {
+                question: 'Which of the following is Not a complication of massive blood transfusion?',
+                options: ['Hypothermia.', 'Hyperkalemia.', 'Hyponatremia.', 'Hypocalcemia.'],
+                correctAnswer: 'Hyponatremia.'
+            },
+            {
+                question: 'Which of the following is Not a complication of massive blood transfusion?',
+                options: ['Hypothermia.', 'Hypokalemia.', 'Hypocalcemia.', 'Coagulopathy.'],
+                correctAnswer: 'Hypokalemia.'
+            },
+            {
+                question: 'Regarding blood transfusion, which of the following is False:',
+                options: ['Whole blood is only indicated for the treatment of acute haemorrhage.', 'Platelets concentrates are used in massive blood transfusion.', 'Cryoprecipitate is used for Hemophilia B.', 'Fresh-frozen plasma is used to reverse oral anticoagulation with warfarin/coumarin compounds.'],
+                correctAnswer: 'Cryoprecipitate is used for Hemophilia B.'
+            },
+            {
+                question: 'Regarding blood transfusion, which of the following is considered delayed complication?',
+                options: ['Pyrogenic reactions.', 'Hemolytic reactions.', 'Transmission of viral hepatitis.', 'Transfusion-related lung Injury.'],
+                correctAnswer: 'Transmission of viral hepatitis.'
+            },
+            {
+                question: 'Which of the following infection is Not transmitted by blood transfusion?',
+                options: ['Viral hepatitis A.', 'Viral hepatitis B.', 'Viral hepatitis C.', 'AIDS.'],
+                correctAnswer: 'Viral hepatitis A.'
+            },
+            {
+                question: 'Fresh frozen plasma (FFP) is used for the following conditions except:',
+                options: ['Bleeding due to non-specified coagulation factor deficiency.', 'Platelet dysfunction with bleeding.', 'To reverse oral anticoagulation.', 'Patients with disseminated intravascular coagulation (DIC).'],
+                correctAnswer: 'Platelet dysfunction with bleeding.'
+            },
+            {
+                question: 'Regarding blood transfusion, which of the following is False:',
+                options: ['Whole blood is only indicated for the treatment of acute haemorrhage.', 'Platelets concentrates are used in massive blood transfusion.', 'Copper overload occurs with repeated blood transfusion.', 'Fresh-frozen plasma is used to reverse oral anticoagulation with warfarin/coumarin compounds.'],
+                correctAnswer: 'Copper overload occurs with repeated blood transfusion.'
+            },
+            {
+                question: 'Regarding blood transfusion, which of the following is considered acute complication?',
+                options: ['Syphilis.', 'HIV infection.', 'Haemosiderosis.', 'Transfusion-related lung Injury.'],
+                correctAnswer: 'Transfusion-related lung Injury.'
+            },
+            {
+                question: 'All the following occur in hypovolemic shock Except:',
+                options: ['Tachycardia.', 'Tachypnea.', 'Skin becomes pale, cold and dry due to decreased sweat secretion.', 'Oliguria.'],
+                correctAnswer: 'Skin becomes pale, cold and dry due to decreased sweat secretion.'
+            },
+            {
+                question: 'All the following can cause cardiogenic shock Except:',
+                options: ['Acute myocardial infarction.', 'Massive pulmonary embolism.', 'Cardiac tamponade.', 'Rupture of aortic aneurysm.'],
+                correctAnswer: 'Rupture of aortic aneurysm.'
+            },
+            {
+                question: 'Treatment of anaphylactic shock includes:   ',
+                options: ['Crystalloid infusion.', 'IV Vasodilator.', 'IV hydrocortisone.', 'IV Antihistaminic.'],
+                correctAnswer: 'Crystalloid infusion.', // Retaining the previous choice as a single option. Note: "غير موكد منه" will be added under this question.
+                note: 'غير موكد منه'
+            },
+            {
+                question: 'Treatment of hypovolemic shock includes the following Except:',
+                options: ['Fluid administration.', 'Catheter insertion to monitor urine output.', 'Vasodilator drugs to help circulation.', 'Recumbent position with moderate elevation of the lower limbs (30 degrees).'],
+                correctAnswer: 'Vasodilator drugs to help circulation.'
+            },
+            {
+                question: 'In anaphylactic shock, which is False?',
+                options: ['Hypotension occurs.', 'Bronchodilatation occurs.', 'Laryngeal edema occurs.', 'Hydrocortisone is used.'],
+                correctAnswer: 'Bronchodilatation occurs.'
+            },
+            {
+                question: 'Which of the following is not a cause of hypovolemic shock?',
+                options: ['Burns.', 'Bleeding.', 'Severe diarrhea.', 'Drug hypersensitivity.'],
+                correctAnswer: 'Drug hypersensitivity.'
+            },
+            {
+                question: 'All the following occur in Septic shock Except:',
+                options: ['Bradycardia.', 'Tachypnea.', 'Altered mental status.', 'Oliguria.'],
+                correctAnswer: 'Bradycardia.'
+            },
+            {
+                question: 'Regarding anaphylactic shock, which is False?',
+                options: ['Characterized by release of large amounts of histamine.', 'Can occur with antibiotic.', 'Bronchospasm and vasospasm occur.', 'Adrenaline is used in treatment.'],
+                correctAnswer: 'Bronchospasm and vasospasm occur.'
+            },
+            {
+                question: 'What type of shock is caused by an acute deficiency of corticosteroids?',
+                options: ['Anaphylactic shock.', 'Cardiogenic shock.', 'Neurogenic shock.', 'Endocrinal shock.'],
+                correctAnswer: 'Endocrinal shock.'
+            },
+            {
+                question: 'Which of the following is NOT a stage of hypovolemic shock?',
+                options: ['Compensated stage.', 'Decompensated stage.', 'Refractory stage.', 'Hyperdynamic stage.'],
+                correctAnswer: 'Hyperdynamic stage.'
+            },
+            {
+                question: 'Maximal wound tensile strength is achieved at about day 60, when it is:',
+                options: ['100% of normal.', '80% of normal.', '60% of normal.', '40% of normal.'],
+                correctAnswer: '80% of normal.'
+            },
+            {
+                question: 'Hemostasis and inflammatory Phase in wound healing take:',
+                options: ['3 days.', '3 weeks.', '3 months.', '6 months.'],
+                correctAnswer: '3 days.'
+            },
+            {
+                question: 'Regarding wound healing, which of the following is False?',
+                options: ['In maturation phase, fibroblasts differentiate into myofibroblasts, which are responsible for wound contraction.', 'Angiogenesis occurs in inflammation phase.', 'Vitamin C deficiency is responsible for lack of maturation of protocollagen.', 'Keloid extends beyond the limits of original wound.'],
+                correctAnswer: 'Angiogenesis occurs in inflammation phase.'
+            },
+            {
+                question: 'Regarding types of wound healing, which of the following is False?',
+                options: ['Clean surgical wounds with well coapted edges heals by primary intention.', 'Healing by secondary intention is better than tertiary intention.', 'Infected wound heals by secondary intention.', 'Excessive granulation tissue forms in healing by second intention.'],
+                correctAnswer: 'Healing by secondary intention is better than tertiary intention.'
+            },
+            {
+                question: 'Factors decrease wound healing include the following Except?',
+                options: ['Ischemia.', 'Immobilization.', 'Infection.', 'Foreign bodies.'],
+                correctAnswer: 'Immobilization.'
+            },
+            {
+                question: 'Factors that decrease wound healing include the following Except?',
+                options: ['Old age.', 'Obesity.', 'Vitamin K deficiency.', 'Steroid intake.'],
+                correctAnswer: 'Vitamin K deficiency.'
+            },
+            {
+                question: 'Which of the following is False regarding incised wounds:',
+                options: ['Have clean cut edges.', 'Tissue damage is minimal.', 'Bleeding is minimal.', 'Less liable to infection.'],
+                correctAnswer: 'Bleeding is minimal.'
+            },
+            {
+                question: 'Factors that decrease wound healing include the following Except?',
+                options: ['Ischemia.', 'Immobilization.', 'Infection.', 'Excessive tension.'],
+                correctAnswer: 'Immobilization.'
+            },
+            {
+                question: 'Regarding wound healing, which of the following is False?',
+                options: ['Inflammation phase takes about 6 weeks.', 'Angiogenesis occurs in proliferative phase.', 'Vitamin C deficiency is responsible for lack of maturation of protocollagen.', 'Hypertrophic scar never extends beyond the limits of original wound.'],
+                correctAnswer: 'Inflammation phase takes about 6 weeks.'
+            },
+            {
+                question: 'What type of wound is characterized by a partial erosion of the superficial layers of the skin due to friction against a rough surface?',
+                options: ['Incised wound.', 'Abrasion.', 'Lacerated wound.', 'Contusion.'],
+                correctAnswer: 'Abrasion.'
+            },
+            {
+                question: 'Which of the following is Not a complication of enteral nutrition?',
+                options: ['Diarrhoea and vomiting.', 'Malposition or blocking of feeding tube.', 'Liver dysfunction.', 'Hyperglycaemia in diabetic patients.'],
+                correctAnswer: 'Liver dysfunction.'
+            },
+            {
+                question: 'The type of enteral feed formula used in patient with hepatic encephalopathy is:',
+                options: ['Polymeric.', 'Disease specific.', 'Elemental.', 'None of the above.'],
+                correctAnswer: 'Disease specific.'
+            },
+            {
+                question: 'Which of the following is Not a catheter-related complication of TPN?',
+                options: ['Pneumothorax.', 'Thrombosis.', 'Infection/Sepsis.', 'Electrolyte and fluid imbalance.'],
+                correctAnswer: 'Electrolyte and fluid imbalance.'
+            },
+            {
+                question: 'Which of the following is Not an indication of Total parenteral nutrition (TPN)?',
+                options: ['Patients with stroke.', 'Short bowel syndrome.', 'Severe Crohn\'s disease.', 'High-output fistula.'],
+                correctAnswer: 'Patients with stroke.'
+            },
+            {
+                question: 'Regarding total parenteral nutrition, which of the following is False?',
+                options: ['May be indicated in severe pancreatitis.', 'Indicated in short bowel syndrome.', 'Requires Central venous catheter.', 'Renal dysfunction is a common long-term complication.'],
+                correctAnswer: 'Renal dysfunction is a common long-term complication.'
+            },
+            {
+                question: 'Which of the following organ can be severely affected with long-term total parenteral nutrition (TPN):',
+                options: ['Thyroid.', 'Pancreas.', 'Kidney.', 'Liver.'],
+                correctAnswer: 'Liver.'
+            },
+            {
+                question: 'A malnourished patient has the following, Except:',
+                options: ['Impaired immune system.', 'Delayed wound healing.', 'Decreased renal function post-operatively.', 'Decreased ventilatory function post-operatively.'],
+                correctAnswer: 'Decreased renal function post-operatively.'
+            },
+            {
+                question: 'Regarding total parenteral nutrition, which of the following is False?',
+                options: ['Discontinuation of TPN should occur when the patient can satisfy 50% of caloric and protein needs with enteral feeding.', 'Indicated in short bowel syndrome.', 'Requires Central venous catheter.', 'Hyperglycemia is a common complication.'],
+                correctAnswer: 'Discontinuation of TPN should occur when the patient can satisfy 50% of caloric and protein needs with enteral feeding.'
+            },
+            {
+                question: 'Regarding surgical nutrition, which of the following is False?',
+                options: ['Malnutrition is associated with increased morbidity and mortality.', 'A malnourished patient has a significantly reduced immunity.', 'A malnourished patient should take parenteral nutrition as first choice if his GIT is functioning.', 'Parenteral nutrition can be administered through a peripheral IV catheter.'],
+                correctAnswer: 'A malnourished patient should take parenteral nutrition as first choice if his GIT is functioning.'
+            },
+            {
+                question: 'Which complication is associated with total parenteral nutrition (TPN)?',
+                options: ['Hyperglycemia.', 'Wound infection.', 'Diarrhea.', 'Nasogastric tube blockage.'],
+                correctAnswer: 'Hyperglycemia.'
+            },
+            {
+                question: 'Which of the following is Not related to diagnosis of SIRS:',
+                options: ['Temperature >38°C or <36°C.', 'White cell count >12 × 10^9/l or <4 × 10^9/l.', 'Bradycardia <60/min.', 'Tachypnoea >20/min.'],
+                correctAnswer: 'Bradycardia <60/min.'
+            },
+            {
+                question: 'Regarding surgical infection, which of the following is correct:',
+                options: ['Operation in field with fecal peritonitis results in Class III surgical site infection.', 'Surgical debridement is not essential in case of necrotizing fasciitis.', 'Cellulitis is suppurative invasive infection of tissues.', 'Acute abscess may spontaneously rupture without treatment.'],
+                correctAnswer: 'Operation in field with fecal peritonitis results in Class III surgical site infection.'
+            },
+            {
+                question: 'Treatment of acute abscess includes the following Except:',
+                options: ['Surgical debridement.', 'Antibiotic.', 'Analgesics, antipyretic.', 'Incision and drainage.'],
+                correctAnswer: 'Surgical debridement.'
+            },
+            {
+                question: 'Infectious cause of SIRS includes:',
+                options: ['Pancreatitis.', 'Multiple trauma.', 'Fecal peritonitis.', 'Burns.'],
+                correctAnswer: 'Fecal peritonitis.'
+            },
+            {
+                question: 'Cardinal signs of localized inflammatory response include the following Except:',
+                options: ['Pain.', 'Ecchymosis.', 'Localized edema.', 'Loss of function.'],
+                correctAnswer: 'Ecchymosis.'
+            },
+            {
+                question: 'Important elements for surgical site infections to take place include:',
+                options: ['Infective agents.', 'Susceptible host.', 'A & B.', 'None of the above.'],
+                correctAnswer: 'A & B.'
+            },
+            {
+                question: 'Regarding Sepsis, which of the following is False:',
+                options: ['It is associated with SIRS.', 'Presence of infection is essential for diagnosis.', 'Presence of fever is essential for diagnosis.', 'May lead to multi-organ failure in severe form.'],
+                correctAnswer: 'Presence of fever is essential for diagnosis.'
+            },
+            {
+                question: 'Regarding Necrotizing fasciitis, which of the following is Correct?',
+                options: ['It is localized suppurative inflammation.', 'Surgical debridement can be avoided by use of IV broad-spectrum antibiotics.', 'Crepitus is due to presence of gas in tissue plains.', 'Toxemia is mild and occurs late.'],
+                correctAnswer: 'Crepitus is due to presence of gas in tissue plains.'
+            },
+            {
+                question: 'Which of the following is True regarding class III surgical wound:',
+                options: ['Called clean-contaminated wound.', 'Includes operations that involve opening of a viscus with minimal spillage or contamination.', 'Risk of infection >40%.', 'Antibiotic prophylaxis is required.'],
+                correctAnswer: 'Antibiotic prophylaxis is required.'
+            },
+            {
+                question: 'Which of the following is Not a complication of acute abscess:',
+                options: ['Pointing and rupture.', 'Chronicity.', 'Gangrene and amputation.', 'Toxemia.'],
+                correctAnswer: 'Gangrene and amputation.'
+            },
+            {
+                question: 'Regarding phases of perioperative nursing which of the following is correct:',
+                options: ['Preoperative phase is period of time from when patient is transferred into operating room to admission to postanesthesia care unit (PACU).', 'Intraoperative phase is period of time from decision for surgery until patient is transferred into operating room.', 'Postoperative phase is period of time from when patient is admitted to PACU to follow-up evaluation in clinical setting or at home.', 'Postoperative phase is period of time from transferring patient into operating room to follow-up evaluation in clinical setting or at home.'],
+                correctAnswer: 'Postoperative phase is period of time from when patient is admitted to PACU to follow-up evaluation in clinical setting or at home.'
+            },
+            {
+                question: 'Regarding informed consent, which of the following is Incorrect:',
+                options: ['Protects the patient against illegal surgery.', 'Protects the surgeon and hospital against legal action by a patient.', 'Should not be given with coercion.', 'A written form is not essential.'],
+                correctAnswer: 'A written form is not essential.'
+            },
+            {
+                question: 'Which of the following is False, regarding preoperative preparation of the patient:',
+                options: ['Any nutrient deficiency should be corrected before surgery.', 'TPN is first choice for preoperative preparation of malnourished patient.', 'IV fluid therapy is used in dehydrated patients.', 'The patient can drink clear fluids up to 3 to 4 hours before surgery if the physician allows.'],
+                correctAnswer: 'TPN is first choice for preoperative preparation of malnourished patient.'
+            },
+            {
+                question: 'Which of the following is False, regarding perioperative nursing interventions:',
+                options: ['The use of a pain rating scale promotes postoperative pain management.', 'Splinting the incision line can minimize pressure and control pain.', 'Frequent position changes after surgery is generally prohibited.', 'The use of spirometer can be useful for lung expansion after surgery.'],
+                correctAnswer: 'Frequent position changes after surgery is generally prohibited.'
+            },
+            {
+                question: 'Which of the following is False, regarding Skin perioperative preparation?',
+                options: ['Marking the site of surgical procedure is very helpful.', 'If hair is to be removed, remove it immediately before the operation.', 'Presurgical bath is done with antiseptic soap, focusing on contaminated areas, like the navel, perineum, and inguinal folds.', 'Presurgical bath is done 48 hours before the intervention.'],
+                correctAnswer: 'Presurgical bath is done 48 hours before the intervention.'
+            },
+            {
+                question: 'Just before entering the patient into operation room, which of the following is False:',
+                options: ['Dress patient in a hospital gown that is securely tied.', 'Prevent the patient to void before going to the operating room.', 'Remove any dentures.', 'All articles of value especially jewelry should be kept with the patient.'],
+                correctAnswer: 'All articles of value especially jewelry should be kept with the patient.'
+            },
+            {
+                question: 'A female 18-year-old with mental disability admitted to surgery department for acute appendicitis. Which of the following is Correct regarding informed consent of appendectomy?',
+                options: ['Informed consent is not essential in this case.', 'Informed consent should be obtained from the patient.', 'Informed consent should be obtained from the parent.', 'Informed consent should be obtained from the neuropsychiatric doctor.'],
+                correctAnswer: 'Informed consent should be obtained from the parent.'
+            },
+            {
+                question: 'Which of the following is False regarding preoperative physiological assessment of the patient?',
+                options: ['Dehydration and electrolyte imbalances should be carefully assessed and documented.', 'Surgery is usually contraindicated for a patient who has a respiratory infection.', 'Assessment of mouth for dentures is essential.', 'Nutritional status is improved with obesity.'],
+                correctAnswer: 'Nutritional status is improved with obesity.'
+            },
+            {
+                question: 'The informed consent should contain the following Except:',
+                options: ['Information about the procedure.', 'Information about the doctor that will perform the procedure.', 'Description of risks and benefits of the procedure.', 'Description of alternatives of the procedure.'],
+                correctAnswer: 'Information about the doctor that will perform the procedure.'
+            },
+            {
+                question: 'Period of time from when patient is transferred into operating room to admission to postanesthesia care unit is:',
+                options: ['Preoperative phase.', 'Intraoperative phase.', 'Postoperative phase.', 'Pre-anesthesia phase.'],
+                correctAnswer: 'Intraoperative phase.'
+            },
+            {
+                question: 'Regarding a valid Informed Consent, which of the following is False?',
+                options: ['Must be voluntarily.', 'Should be written.', 'Not essential for patients below 18 years of age.', 'Should contain procedure explanation.'],
+                correctAnswer: 'Not essential for patients below 18 years of age.'
+            }
+        ];
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Function to render the quiz questions dynamically
+        function renderQuiz() {
+            quizForm.innerHTML = ''; // Clear existing questions
+
+            let currentQuestionNumber = 1;
+
+            allQuestionsData.forEach(qData => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question';
+                const questionId = `q${currentQuestionNumber}`;
+                questionDiv.id = questionId;
+
+                const questionText = document.createElement('h3');
+                questionText.textContent = `${currentQuestionNumber}. ${qData.question}`;
+                questionDiv.appendChild(questionText);
+
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'options';
+
+                const shuffledOptions = [...qData.options];
+                shuffleArray(shuffledOptions); // Shuffle options within each question
+
+                const optionLetters = ['A', 'B', 'C', 'D'];
+
+                shuffledOptions.forEach((optionText, index) => {
+                    const label = document.createElement('label');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = questionId;
+                    input.value = optionText;
+
+                    const span = document.createElement('span');
+                    span.textContent = `${optionLetters[index]}. ${optionText}`; // Add A. B. C. D. dynamically
+
+                    input.addEventListener('change', function() {
+                        this.closest('.options').querySelectorAll('label').forEach(lbl => {
+                            lbl.classList.remove('selected');
+                        });
+                        this.closest('label').classList.add('selected');
+                        this.closest('.question').classList.remove('highlight-error');
+                        this.closest('.question').querySelector('.error-message').style.display = 'none';
+                    });
+
+                    label.appendChild(input);
+                    label.appendChild(span);
+                    optionsDiv.appendChild(label);
+                });
+
+                questionDiv.appendChild(optionsDiv);
+
+                // Add specific note for question 29
+                if (currentQuestionNumber === 29 && qData.note) {
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'question-note';
+                    noteDiv.textContent = qData.note;
+                    questionDiv.appendChild(noteDiv);
+                }
+
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'error-message';
+                errorMessage.textContent = 'Please select an option for this question.';
+                questionDiv.appendChild(errorMessage);
+
+                quizForm.appendChild(questionDiv);
+
+                correctAnswers[questionId] = qData.correctAnswer;
+                questionIds.push(questionId);
+
+                currentQuestionNumber++;
+            });
+
+            // Add the supplication before the submit button
+            const supplicationDiv = document.createElement('div');
+            supplicationDiv.className = 'supplication';
+            supplicationDiv.textContent = 'اللهم إني استودعك ما قرأت وما حفظت وما تعلمت، فرده لي عند حاجتي إليه';
+            quizForm.appendChild(supplicationDiv);
+
+            // Add the developer note
+            const developerNoteDiv = document.createElement('div');
+            developerNoteDiv.className = 'developer-note';
+            developerNoteDiv.textContent = 'تم إعداده وتنفيذه بواسطة عبدو بكر';
+            quizForm.appendChild(developerNoteDiv);
+
+
+            const submitButton = document.createElement('button');
+            submitButton.type = 'submit';
+            submitButton.className = 'submit-btn';
+            submitButton.textContent = 'Submit Quiz';
+            quizForm.appendChild(submitButton);
+        }
+
+        document.addEventListener('DOMContentLoaded', renderQuiz);
+
+        quizForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let score = 0;
+            let firstUnansweredQuestion = null;
+            const questionElements = document.querySelectorAll('.question');
+
+            questionElements.forEach(questionDiv => {
+                questionDiv.classList.remove('highlight-error');
+                questionDiv.querySelector('.error-message').style.display = 'none';
+                questionDiv.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('correct', 'incorrect', 'selected');
+                });
+            });
+
+            questionIds.forEach(qId => {
+                const selectedOption = document.querySelector(`input[name="${qId}"]:checked`);
+                const questionDiv = document.getElementById(qId);
+
+                if (!selectedOption) {
+                    if (!firstUnansweredQuestion) {
+                        firstUnansweredQuestion = questionDiv;
+                    }
+                    questionDiv.classList.add('highlight-error');
+                    questionDiv.querySelector('.error-message').style.display = 'block';
+                } else {
+                    const userAnswer = selectedOption.value;
+                    const correctAnswer = correctAnswers[qId];
+                    const label = selectedOption.closest('label');
+
+                    if (userAnswer === correctAnswer) {
+                        score++;
+                        label.classList.add('correct');
+                    } else {
+                        label.classList.add('incorrect');
+                        const correctLabel = Array.from(questionDiv.querySelectorAll('.options label')).find(lbl =>
+                            lbl.querySelector('input').value === correctAnswer
+                        );
+                        if (correctLabel) {
+                            correctLabel.classList.add('correct');
+                        }
+                    }
+                }
+            });
+
+            if (firstUnansweredQuestion) {
+                firstUnansweredQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            totalQuestionsSpan.textContent = allQuestionsData.length;
+            scoreSpan.textContent = score;
+            scoreContainer.style.display = 'block';
+
+            scoreContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
